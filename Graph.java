@@ -4,6 +4,7 @@ package lab1;
 import java.io.*;
 import java.util.*;
 
+//修改3 S2R7 B2
 public class Graph {
     private Map<String, Map<String, Integer>> adjacencyList;
     private Map<String, Integer> distances;
