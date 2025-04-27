@@ -141,6 +141,7 @@ public class Graph {
     }
 
     public String queryBridgeWords(String word1, String word2) {
+        // 处理输入：过滤非字母字符、转换为小写
         // Implementation to query bridge words
         // 统一转换为小写处理
         String w1 = word1.toLowerCase();
