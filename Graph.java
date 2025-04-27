@@ -60,11 +60,6 @@ public class Graph {
             System.out.println("6. Random Walk");
             System.out.println("7. Exit");
 
-            if (!scanner.hasNextLine()) {
-                System.out.println("Input stream closed. Exiting...");
-                break;
-            }
-
             String input = scanner.nextLine().trim(); // 读取用户输入
             if (input.isEmpty()) {
                 System.out.println("Invalid input. Please enter a number between 1 and 7.");
