@@ -1,5 +1,6 @@
 package lab1;
 
+//修改2 S2R5
 // Graph.java
 import java.io.*;
 import java.util.*;
@@ -764,3 +765,5 @@ public class Graph {
     }
 
 }
+
+// s2r4修改1
