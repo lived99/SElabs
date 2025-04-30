@@ -456,7 +456,6 @@ public class Graph {
 
         } catch (IOException | InterruptedException e) {
             System.err.println("Error generating graph image: " + e.getMessage());
-            System.err.println("Please install Graphviz from https://graphviz.org/");
         }
     }
 
