@@ -16,6 +16,8 @@ public class Graph {
     private Map<String, Integer> wordFrequency;
     private Map<String, Double> outWeights;
     private Map<String, Set<String>> reverseAdjacencyList;
+    private Map<String, Integer> documentFrequency; // 文档频率（词出现的文档数）
+    private int totalDocuments; // 总文档数（句子数）
 
     public Graph() {
         adjacencyList = new HashMap<>();
@@ -396,7 +398,30 @@ public class Graph {
 
         // 统计词频
         words.forEach(word -> wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1));
+        // 新增文档频率统计
+        documentFrequency = new HashMap<>();
+        List<String> sentences = splitIntoSentences(words); // 分句实现
+        totalDocuments = sentences.size();
 
+        for (String sentence : sentences) {
+            Set<String> uniqueWords = new HashSet<>();
+            // 处理句子中的单词（需与主处理逻辑一致）
+            String processed = sentence.replaceAll("[^a-zA-Z ]", " ")
+                    .toLowerCase().trim();
+            String[] tokens = processed.split("\\s+");
+
+            for (String token : tokens) {
+                if (!token.isEmpty()) {
+                    uniqueWords.add(token);
+                }
+            }
+
+            // 更新文档频率
+            for (String word : uniqueWords) {
+                documentFrequency.put(word,
+                        documentFrequency.getOrDefault(word, 0) + 1);
+            }
+        }
         // 构建邻接表和反向邻接表
         for (int i = 0; i < words.size() - 1; i++) {
             String current = words.get(i);
@@ -710,52 +735,60 @@ public class Graph {
     }
 
     private void calculatePageRank(double damping, int maxIterations, double threshold) {
-        // 初始化PageRank值
+        // 1. 基于TF-IDF的初始PR值分配
         pageRank = new HashMap<>();
-        double totalFreq = wordFrequency.values().stream()
-                .mapToInt(Integer::intValue).sum();
 
-        // 基于词频的初始值分配
-        adjacencyList.keySet().forEach(node -> pageRank.put(node, wordFrequency.get(node) / totalFreq));
+        // 计算TF-IDF值
+        Map<String, Double> tfidfMap = computeTFIDF();
+        double totalTFIDF = tfidfMap.values().stream().mapToDouble(Double::doubleValue).sum();
 
+        // 归一化TF-IDF作为初始PR值
+        for (String node : adjacencyList.keySet()) {
+            pageRank.put(node, tfidfMap.get(node) / totalTFIDF);
+        }
+
+        // 2. PageRank迭代计算
+        int totalNodes = adjacencyList.size();
         boolean converged;
         int iterations = 0;
-        int totalNodes = adjacencyList.size();
+
         do {
             Map<String, Double> newRank = new HashMap<>();
             double danglingPR = 0.0;
 
-            // 计算悬挂节点的PR总和
+            // 步骤1：计算所有悬挂节点的总PR值
             for (String node : adjacencyList.keySet()) {
                 if (adjacencyList.get(node).isEmpty()) {
                     danglingPR += pageRank.get(node);
                 }
             }
 
-            // 计算悬挂节点贡献（当节点数>1时）
+            // 步骤2：计算每个节点获得的悬挂贡献（均分给其他节点）
             double danglingContribution = 0.0;
             if (totalNodes > 1) {
                 danglingContribution = damping * danglingPR / (totalNodes - 1);
             }
 
-            // 计算新的PR值
+            // 步骤3：计算各节点的新PR值
             for (String node : adjacencyList.keySet()) {
                 double pr = (1 - damping) / totalNodes; // 随机跳转部分
+
+                // 添加悬挂节点的均分贡献
                 pr += danglingContribution;
 
-                // 正常入链贡献
+                // 添加入链贡献
                 for (String inbound : reverseAdjacencyList.getOrDefault(node, new HashSet<>())) {
-                    double totalWeight = outWeights.getOrDefault(inbound, 0.0);
-                    if (totalWeight > 0) {
-                        double weight = adjacencyList.get(inbound).get(node);
-                        pr += damping * pageRank.get(inbound) * (weight / totalWeight);
+                    double totalOutWeight = outWeights.getOrDefault(inbound, 0.0);
+                    if (totalOutWeight > 0) {
+                        double edgeWeight = adjacencyList.get(inbound).get(node);
+                        pr += damping * pageRank.get(inbound) * (edgeWeight / totalOutWeight);
                     }
                 }
 
                 newRank.put(node, pr);
             }
 
-            // 检查收敛
+            // 步骤4：检查收敛
             converged = true;
             for (String node : adjacencyList.keySet()) {
                 if (Math.abs(newRank.get(node) - pageRank.get(node)) > threshold) {
@@ -767,6 +800,48 @@ public class Graph {
             pageRank = newRank;
             iterations++;
         } while (!converged && iterations < maxIterations);
+    }
+
+    // 计算TF-IDF的工具方法
+    private Map<String, Double> computeTFIDF() {
+        Map<String, Double> tfidfMap = new HashMap<>();
+        int totalWords = wordFrequency.values().stream().mapToInt(Integer::intValue).sum();
+        int totalDocs = Math.max(totalDocuments, 1); // 防止除零
+
+        for (String node : adjacencyList.keySet()) {
+            // 词频（Term Frequency）
+            double tf = (double) wordFrequency.get(node) / totalWords;
+
+            // 文档频率（Document Frequency）
+            int df = documentFrequency.getOrDefault(node, 0);
+
+            // 逆文档频率（Inverse Document Frequency）
+            double idf = Math.log((totalDocs + 1.0) / (df + 1.0)) + 1; // 加1平滑
+
+            tfidfMap.put(node, tf * idf);
+        }
+
+        return tfidfMap;
+    }
+
+    // 分句工具方法
+    private List<String> splitIntoSentences(List<String> words) {
+        List<String> sentences = new ArrayList<>();
+        StringBuilder sentence = new StringBuilder();
+
+        for (String word : words) {
+            sentence.append(word).append(" ");
+            if (word.matches(".*[.!?]$")) { // 简单分句规则
+                sentences.add(sentence.toString().trim());
+                sentence.setLength(0);
+            }
+        }
+
+        if (sentence.length() > 0) {
+            sentences.add(sentence.toString().trim());
+        }
+
+        return sentences;
     }
 
 }
