@@ -720,6 +720,7 @@ public class Graph {
 
         boolean converged;
         int iterations = 0;
+        int totalNodes = adjacencyList.size();
         do {
             Map<String, Double> newRank = new HashMap<>();
             double danglingPR = 0.0;
@@ -731,12 +732,15 @@ public class Graph {
                 }
             }
 
-            // 分配悬挂节点的PR
-            double danglingContribution = damping * danglingPR / adjacencyList.size();
+            // 计算悬挂节点贡献（当节点数>1时）
+            double danglingContribution = 0.0;
+            if (totalNodes > 1) {
+                danglingContribution = damping * danglingPR / (totalNodes - 1);
+            }
 
             // 计算新的PR值
             for (String node : adjacencyList.keySet()) {
-                double pr = (1 - damping) / adjacencyList.size(); // 随机跳转部分
+                double pr = (1 - damping) / totalNodes; // 随机跳转部分
                 pr += danglingContribution;
 
                 // 正常入链贡献
