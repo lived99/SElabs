@@ -1,0 +1,391 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > GraphTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">lab1.lab3b</a>
+</div>
+
+<h1>Coverage Summary for Class: GraphTest (lab1.lab3b)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GraphTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/48)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package lab1.lab3b;
+&nbsp;
+&nbsp;import lab1.Graph;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.regex.Matcher;
+&nbsp;import java.util.regex.Pattern;
+&nbsp;
+&nbsp;import static org.junit.jupiter.api.Assertions.assertEquals;
+&nbsp;import static org.junit.jupiter.api.Assertions.assertTrue;
+&nbsp;
+<b class="nc">&nbsp;public class GraphTest {</b>
+&nbsp;
+&nbsp;    private Graph graph;
+&nbsp;
+&nbsp;    // 新的测试文本
+&nbsp;    private static final String TEST_TEXT = &quot;The scientist carefully analyzed the data, wrote a detailed report, and shared the report with the team, but the team requested more data, so the scientist analyzed it again.&quot;;
+&nbsp;
+&nbsp;    // 辅助方法：从文本中加载图
+&nbsp;    private void loadGraphFromText(String text) {
+<b class="nc">&nbsp;        String cleanedText = text.toLowerCase();</b>
+<b class="nc">&nbsp;        Pattern pattern = Pattern.compile(&quot;[a-z]+&quot;);</b>
+<b class="nc">&nbsp;        Matcher matcher = pattern.matcher(cleanedText);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;String&gt; words = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        while (matcher.find()) {</b>
+<b class="nc">&nbsp;            words.add(matcher.group());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        for (int i = 0; i &lt; words.size() - 1; i++) {</b>
+<b class="nc">&nbsp;            String word1 = words.get(i);</b>
+<b class="nc">&nbsp;            String word2 = words.get(i + 1);</b>
+<b class="nc">&nbsp;            graph.addEdge(word1, word2); // 使用 Graph 类的 addEdge 方法</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setup() {
+<b class="nc">&nbsp;        graph = new Graph();</b>
+<b class="nc">&nbsp;        loadGraphFromText(TEST_TEXT);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // --- Test Cases for queryBridgeWords ---
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试：&#39;the&#39; 和 &#39;data&#39; 之间的桥接词 &#39;analyzed&#39; 和 &#39;team&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_TheToData() {
+&nbsp;        // 分析文本 &quot;The scientist carefully analyzed the data, wrote a detailed report, and shared the report with the team, but the team requested more data, so the scientist analyzed it again.&quot;
+&nbsp;        // 提取相关片段和连接：
+&nbsp;        // 1. &quot;analyzed the data&quot; -&gt; &#39;analyzed&#39; -&gt; &#39;the&#39; -&gt; &#39;data&#39;
+&nbsp;        //    这里，&#39;the&#39; -&gt; &#39;analyzed&#39; (不存在)
+&nbsp;        //    正确理解桥接词 &quot;word1 -&gt; word3 -&gt; word2&quot;
+&nbsp;        //    所以，我们需要寻找 X 使得 &#39;the&#39; -&gt; X 且 X -&gt; &#39;data&#39;
+&nbsp;        //
+&nbsp;        //    文本中的连接 (假设已经小写处理):
+&nbsp;        //    &#39;the&#39; -&gt; &#39;scientist&#39;
+&nbsp;        //    &#39;analyzed&#39; -&gt; &#39;the&#39;
+&nbsp;        //    &#39;the&#39; -&gt; &#39;data&#39; (来自 &quot;the data&quot;)
+&nbsp;        //    &#39;the&#39; -&gt; &#39;report&#39; (来自 &quot;the report&quot;)
+&nbsp;        //    &#39;the&#39; -&gt; &#39;team&#39; (来自 &quot;the team&quot;)
+&nbsp;        //    &#39;more&#39; -&gt; &#39;data&#39; (来自 &quot;more data&quot;)
+&nbsp;        //    &#39;it&#39; -&gt; &#39;again&#39; (来自 &quot;it again&quot;)
+&nbsp;        //
+&nbsp;        //    寻找 &quot;the&quot; 到 &quot;data&quot; 的桥接词 (the -&gt; X -&gt; data):
+&nbsp;        //    检查 &#39;the&#39; 的出边：&#39;scientist&#39;, &#39;data&#39;, &#39;report&#39;, &#39;team&#39;
+&nbsp;        //    1. X = &#39;scientist&#39;? &#39;scientist&#39; -&gt; &#39;data&#39; 不存在。
+&nbsp;        //    2. X = &#39;data&#39;? &#39;data&#39; -&gt; &#39;data&#39; 不存在（自环通常不视为桥接）。
+&nbsp;        //    3. X = &#39;report&#39;? &#39;report&#39; -&gt; &#39;data&#39; 不存在。
+&nbsp;        //    4. X = &#39;team&#39;? &#39;team&#39; -&gt; &#39;requested&#39; -&gt; &#39;more&#39; -&gt; &#39;data&#39;
+&nbsp;        //       但我们只找直接桥接 word1 -&gt; X -&gt; word2
+&nbsp;        //       所以，我们需要找 &#39;team&#39; -&gt; &#39;data&#39;。
+&nbsp;        //       文本中是 &#39;team&#39; -&gt; &#39;requested&#39;，没有 &#39;team&#39; -&gt; &#39;data&#39;。
+&nbsp;        //
+&nbsp;        //    重新审查文本：
+&nbsp;        //    &#39;the&#39; -&gt; &#39;data&#39; (来自 &quot;the data&quot;)
+&nbsp;        //    &#39;the&#39; -&gt; &#39;report&#39; (来自 &quot;the report&quot;)
+&nbsp;        //    &#39;the&#39; -&gt; &#39;team&#39; (来自 &quot;the team&quot;)
+&nbsp;        //    &#39;analyzed&#39; -&gt; &#39;the&#39;
+&nbsp;        //    &#39;more&#39; -&gt; &#39;data&#39;
+&nbsp;        //
+&nbsp;        //    对于 &#39;the&#39; 和 &#39;data&#39;:
+&nbsp;        //    寻找 X 使得 &#39;the&#39; -&gt; X 且 X -&gt; &#39;data&#39;
+&nbsp;        //    从文本看：
+&nbsp;        //    &#39;the&#39; -&gt; &#39;scientist&#39;
+&nbsp;        //    &#39;scientist&#39; -&gt; &#39;carefully&#39;
+&nbsp;        //    &#39;carefully&#39; -&gt; &#39;analyzed&#39;
+&nbsp;        //    &#39;analyzed&#39; -&gt; &#39;the&#39;
+&nbsp;        //    &#39;the&#39; -&gt; &#39;data&#39;  &lt;-- 边存在
+&nbsp;        //
+&nbsp;        //    &#39;report&#39; -&gt; &#39;and&#39;
+&nbsp;        //    &#39;and&#39; -&gt; &#39;shared&#39;
+&nbsp;        //    &#39;shared&#39; -&gt; &#39;the&#39;
+&nbsp;        //    &#39;the&#39; -&gt; &#39;report&#39; &lt;-- 边存在
+&nbsp;        //    &#39;report&#39; -&gt; &#39;with&#39;
+&nbsp;        //    &#39;with&#39; -&gt; &#39;the&#39;
+&nbsp;        //    &#39;the&#39; -&gt; &#39;team&#39; &lt;-- 边存在
+&nbsp;        //
+&nbsp;        //    &#39;team&#39; -&gt; &#39;requested&#39;
+&nbsp;        //    &#39;requested&#39; -&gt; &#39;more&#39;
+&nbsp;        //    &#39;more&#39; -&gt; &#39;data&#39; &lt;-- 边存在
+&nbsp;        //
+&nbsp;        //    &#39;scientist&#39; -&gt; &#39;analyzed&#39;
+&nbsp;        //    &#39;analyzed&#39; -&gt; &#39;it&#39; (来自 &quot;analyzed it again&quot;)
+&nbsp;        //
+&nbsp;        //    根据这些边，再次寻找 &#39;the&#39; 到 &#39;data&#39; 的桥接词：
+&nbsp;        //    &#39;the&#39;的出边有：&#39;scientist&#39;, &#39;data&#39;, &#39;report&#39;, &#39;team&#39;
+&nbsp;        //    检查这些出边作为 X 是否能指向 &#39;data&#39;：
+&nbsp;        //    1. &#39;scientist&#39; -&gt; &#39;data&#39; ? 不存在。
+&nbsp;        //    2. &#39;data&#39; -&gt; &#39;data&#39; ? 不存在。
+&nbsp;        //    3. &#39;report&#39; -&gt; &#39;data&#39; ? 不存在。
+&nbsp;        //    4. &#39;team&#39; -&gt; &#39;data&#39; ? 不存在。
+&nbsp;        //
+&nbsp;        //    这表明，根据当前文本和严格的桥接词定义，&#39;the&#39; 和 &#39;data&#39; 之间**没有直接桥接词**。
+&nbsp;        //    之前的分析有误。
+&nbsp;
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;the&quot;, &quot;data&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No bridge words from the to data!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试：&#39;wrote&#39; 和 &#39;shared&#39; 之间的桥接词 &#39;a&#39;, &#39;detailed&#39;, &#39;report&#39;, &#39;and&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_WroteToShared() {
+&nbsp;        // 分析文本 &quot;wrote a detailed report, and shared&quot;
+&nbsp;        // 寻找 X 使得 &#39;wrote&#39; -&gt; X 且 X -&gt; &#39;shared&#39;
+&nbsp;        // 文本中的连接：
+&nbsp;        // &#39;wrote&#39; -&gt; &#39;a&#39;
+&nbsp;        // &#39;a&#39; -&gt; &#39;detailed&#39;
+&nbsp;        // &#39;detailed&#39; -&gt; &#39;report&#39;
+&nbsp;        // &#39;report&#39; -&gt; &#39;and&#39;
+&nbsp;        // &#39;and&#39; -&gt; &#39;shared&#39;
+&nbsp;        //
+&nbsp;        // 检查 &#39;wrote&#39; 的出边：&#39;a&#39;
+&nbsp;        // 1. X = &#39;a&#39;? &#39;a&#39; -&gt; &#39;shared&#39; 不存在。
+&nbsp;        //
+&nbsp;        // 这表明，根据当前文本和严格的桥接词定义，&#39;wrote&#39; 和 &#39;shared&#39; 之间**没有直接桥接词**。
+&nbsp;        // 之前的分析有误。
+&nbsp;
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;wrote&quot;, &quot;shared&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No bridge words from wrote to shared!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试：&#39;report&#39; 和 &#39;with&#39; 之间的桥接词 (预期无)&quot;)
+&nbsp;    void testQueryBridgeWords_ReportToWith() {
+&nbsp;        // 分析文本 &quot;report, and shared the report with the team&quot;
+&nbsp;        // 寻找 X 使得 &#39;report&#39; -&gt; X 且 X -&gt; &#39;with&#39;
+&nbsp;        // 文本中的连接：
+&nbsp;        // &#39;report&#39; -&gt; &#39;and&#39; (来自 &quot;report, and&quot;)
+&nbsp;        // &#39;the&#39; -&gt; &#39;report&#39; (来自 &quot;the report&quot;)
+&nbsp;        // &#39;report&#39; -&gt; &#39;with&#39; (来自 &quot;report with&quot;)
+&nbsp;        //
+&nbsp;        // 检查 &#39;report&#39; 的出边：&#39;and&#39;, &#39;with&#39;
+&nbsp;        // 1. X = &#39;and&#39;? &#39;and&#39; -&gt; &#39;with&#39; 不存在。
+&nbsp;        // 2. X = &#39;with&#39;? &#39;with&#39; -&gt; &#39;with&#39; 不存在 (自环通常不作为桥接词)。
+&nbsp;        //
+&nbsp;        // 因此，预期的结果是：没有桥接词。
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;report&quot;, &quot;with&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No bridge words from report to with!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试：&#39;analyzed&#39; 和 &#39;it&#39; 之间的桥接词 &#39;the&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_AnalyzedToIt() {
+&nbsp;        // 文本: &quot;analyzed the data... analyzed it again.&quot;
+&nbsp;        // 寻找 X 使得 &#39;analyzed&#39; -&gt; X 且 X -&gt; &#39;it&#39;
+&nbsp;        // 文本中的连接：
+&nbsp;        // &#39;analyzed&#39; -&gt; &#39;the&#39; (来自 &quot;analyzed the data&quot;)
+&nbsp;        // &#39;analyzed&#39; -&gt; &#39;it&#39; (来自 &quot;analyzed it again&quot;)
+&nbsp;        //
+&nbsp;        // 检查 &#39;analyzed&#39; 的出边：&#39;the&#39;, &#39;it&#39;
+&nbsp;        // 1. X = &#39;the&#39;? &#39;the&#39; -&gt; &#39;it&#39; 不存在。
+&nbsp;        // 2. X = &#39;it&#39;? &#39;it&#39; -&gt; &#39;it&#39; 不存在（自环通常不作为桥接）。
+&nbsp;        //
+&nbsp;        // 仔细看文本 &quot;the scientist carefully analyzed the data, wrote a detailed report, and shared the report with the team, but the team requested more data, so the scientist analyzed it again.&quot;
+&nbsp;        // &#39;analyzed&#39; -&gt; &#39;the&#39; (第一次出现)
+&nbsp;        // &#39;analyzed&#39; -&gt; &#39;it&#39; (第二次出现)
+&nbsp;        // &#39;the&#39; -&gt; &#39;data&#39;
+&nbsp;        // &#39;it&#39; -&gt; &#39;again&#39;
+&nbsp;        //
+&nbsp;        // 所以，寻找 &#39;analyzed&#39; 到 &#39;it&#39; 的桥接词 X：
+&nbsp;        // 1. &#39;analyzed&#39; -&gt; X: &#39;the&#39;, &#39;it&#39;
+&nbsp;        // 2. X -&gt; &#39;it&#39;: 只有 &#39;analyzed&#39; -&gt; &#39;it&#39; (当 X = &#39;analyzed&#39;)
+&nbsp;        //
+&nbsp;        // 唯一的符合 X -&gt; &#39;it&#39; 的 X 是 &#39;analyzed&#39; 自己，但 &#39;analyzed&#39; -&gt; &#39;analyzed&#39; 不符合桥接词定义。
+&nbsp;        // 似乎没有桥接词。
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;analyzed&quot;, &quot;it&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No bridge words from analyzed to it!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试：&#39;team&#39; 和 &#39;data&#39; 之间的桥接词 &#39;requested&#39; 和 &#39;more&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_TeamToData() {
+&nbsp;        // 文本: &quot;the team requested more data&quot;
+&nbsp;        // 寻找 X 使得 &#39;team&#39; -&gt; X 且 X -&gt; &#39;data&#39;
+&nbsp;        // 文本中的连接：
+&nbsp;        // &#39;team&#39; -&gt; &#39;requested&#39;
+&nbsp;        // &#39;requested&#39; -&gt; &#39;more&#39;
+&nbsp;        // &#39;more&#39; -&gt; &#39;data&#39;
+&nbsp;        //
+&nbsp;        // 检查 &#39;team&#39; 的出边：&#39;requested&#39;
+&nbsp;        // 1. X = &#39;requested&#39;? &#39;requested&#39; -&gt; &#39;data&#39; 不存在。
+&nbsp;        //
+&nbsp;        // 似乎没有桥接词。
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;team&quot;, &quot;data&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No bridge words from team to data!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试第一个词不存在于图中：&#39;nonexistent&#39; 和 &#39;data&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_FirstWordNotInGraph() {
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;nonexistent&quot;, &quot;data&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No nonexistent in the graph!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试第二个词不存在于图中：&#39;the&#39; 和 &#39;nonexistent&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_SecondWordNotInGraph() {
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;the&quot;, &quot;nonexistent&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No nonexistent in the graph!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试两个词都不存在于图中：&#39;worda&#39; 和 &#39;wordb&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_BothWordsNotInGraph() {
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;worda&quot;, &quot;wordb&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No worda and wordb in the graph!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试输入包含大小写混合的单词：&#39;The&#39; 和 &#39;Data&#39;&quot;)
+&nbsp;    void testQueryBridgeWords_MixedCaseInput() {
+&nbsp;        // 图中所有词都是小写，但 queryBridgeWords 会处理输入的大小写
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;The&quot;, &quot;Data&quot;);</b>
+&nbsp;        // 根据上面的分析，&quot;the&quot; 到 &quot;data&quot; 应该没有桥接词
+<b class="nc">&nbsp;        assertEquals(&quot;No bridge words from The to Data!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Test
+&nbsp;    @DisplayName(&quot;测试空图时的查询&quot;)
+&nbsp;    void testQueryBridgeWords_EmptyGraph() {
+<b class="nc">&nbsp;        graph = new Graph(); // 创建一个空的图</b>
+<b class="nc">&nbsp;        String result = graph.queryBridgeWords(&quot;word1&quot;, &quot;word2&quot;);</b>
+<b class="nc">&nbsp;        assertEquals(&quot;No word1 and word2 in the graph!&quot;, result);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // 私有辅助方法，用于验证 queryBridgeWords 的输出格式。
+&nbsp;    // 这与 Graph 类中 formatBridgeWordsOutput 的逻辑相同，因为它是私有的无法直接调用。
+&nbsp;    private String formatBridgeWordsOutput(List&lt;String&gt; bridgeWords, String word1, String word2) {
+<b class="nc">&nbsp;        if (bridgeWords.isEmpty()) {</b>
+<b class="nc">&nbsp;            return &quot;No bridge words from &quot; + word1 + &quot; to &quot; + word2 + &quot;!&quot;;</b>
+<b class="nc">&nbsp;        } else if (bridgeWords.size() == 1) {</b>
+<b class="nc">&nbsp;            return &quot;The bridge word from &quot; + word1 + &quot; to &quot; + word2 + &quot; is: &quot; + bridgeWords.get(0) + &quot;.&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;            sb.append(&quot;The bridge words from &quot;).append(word1).append(&quot; to &quot;).append(word2).append(&quot; are: &quot;);</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; bridgeWords.size(); i++) {</b>
+<b class="nc">&nbsp;                sb.append(bridgeWords.get(i));</b>
+<b class="nc">&nbsp;                if (i &lt; bridgeWords.size() - 2) { // 如果不是倒数第二个词</b>
+<b class="nc">&nbsp;                    sb.append(&quot;, &quot;);</b>
+<b class="nc">&nbsp;                } else if (i == bridgeWords.size() - 2) { // 如果是倒数第二个词</b>
+<b class="nc">&nbsp;                    sb.append(&quot; and &quot;);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            sb.append(&quot;.&quot;);</b>
+<b class="nc">&nbsp;            return sb.toString();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-05-28 09:24</div>
+</div>
+</body>
+</html>

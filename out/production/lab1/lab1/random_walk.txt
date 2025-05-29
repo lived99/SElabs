@@ -1,0 +1,4 @@
+Random Walk Path:
+shared → the → scientist
+
+Total Steps: 2

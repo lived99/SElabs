@@ -5,7 +5,7 @@ import java.io.*;
 import java.util.*;
 
 public class Graph {
-    private Map<String, Map<String, Integer>> adjacencyList;
+    public Map<String, Map<String, Integer>> adjacencyList;
     private Map<String, Integer> distances;
     private Map<String, List<String>> predecessors;
     private Map<String, Double> pageRank;
@@ -25,6 +25,30 @@ public class Graph {
         }
         return false;
     }
+
+    public void addEdge(String source, String target) {
+        // 转换为小写，以确保图内部单词的一致性
+        String lowerSource = source.toLowerCase();
+        String lowerTarget = target.toLowerCase();
+
+        // 如果 source 单词不存在于邻接列表中，则添加它
+        adjacencyList.putIfAbsent(lowerSource, new HashMap<>());
+
+        // 增加从 lowerSource 到 lowerTarget 的边的权重。
+        // 如果边不存在，则初始化为 1。
+        // 如果存在，则其当前权重加 1。
+        adjacencyList.get(lowerSource).merge(lowerTarget, 1, Integer::sum);
+
+        // （可选）如果你维护一个反向邻接列表（用于 PageRank 或其他算法），
+        // 请取消注释并确保在构造函数中初始化了 reverseAdjacencyList。
+        // reverseAdjacencyList.putIfAbsent(lowerTarget, new HashSet<>());
+        // reverseAdjacencyList.get(lowerTarget).add(lowerSource);
+
+        // 同时确保 source 和 target 两个单词都是已知节点，即使它们目前没有出边。
+        // 这对于图遍历和 PageRank 中孤立节点或只有入边的节点很重要。
+        adjacencyList.putIfAbsent(lowerTarget, new HashMap<>()); // 确保 target 单词也是一个已知节点
+    }
+
 
     private static class Node {
         String word;
@@ -476,12 +500,14 @@ public class Graph {
 
     private String formatBridgeWordsOutput(List<String> words, String w1, String w2) {
         StringBuilder sb = new StringBuilder();
-        sb.append("The bridge word from ")
-                .append(w1).append(" to ").append(w2).append(" is: ");
 
         if (words.size() == 1) {
+            sb.append("The bridge word from ")
+                    .append(w1).append(" to ").append(w2).append(" is: ");
             sb.append(words.get(0));
         } else {
+            sb.append("The bridge words from ")
+                    .append(w1).append(" to ").append(w2).append(" are: ");
             for (int i = 0; i < words.size() - 1; i++) {
                 if (i == words.size() - 2) {
                     sb.append(words.get(i)).append(" and ");
@@ -495,7 +521,7 @@ public class Graph {
         return sb.toString();
     }
 
-    private List<String> getBridgeWords(String word1, String word2) {
+    public List<String> getBridgeWords(String word1, String word2) {
         List<String> result = new ArrayList<>();
 
         // 检查节点存在性
